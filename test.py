@@ -10,11 +10,9 @@ import app
 # 3. Create LogicTest class for tests on the application logic (operations)
 
 
-class DatabaseTest(unittest.TestCase):
+class DatabaseTests(unittest.TestCase):
 
     def test_db_initializer(self):
-
-        db = app.get_db()
 
         print(f'\nIn {self.__class__.__name__}.test_database_exists()...')
 
@@ -22,16 +20,36 @@ class DatabaseTest(unittest.TestCase):
         print(f'DB file exists?: {_db_file_exists}')
         self.assertTrue(_db_file_exists, '(DB file not found)')
 
+    def test_empty_db(self):
 
-# class LogicTest(unittest.TestCase):
-#
-#     # TO BE UPDATED WITH ACTUAL Response to INDEX
-#     def test_index(self):
-#
-#         test_app_client = app.APP.test_client()
-#
-#         response = test_app_client.get('/', content_type="html/text")
-#         assert response.status_code == 200
+        print(f'\n In {self.__class__.__name__}.test_empty_db()...')
+
+        test_app_client = app.APP.test_client()
+        response = test_app_client.get('/')
+        response_data = response.data
+        assert b'No entries in table' in response_data
+        print(f'Response data is: {response_data}')
+
+
+class LogicTest(unittest.TestCase):
+
+    def test_create_entry(self):
+        ...
+
+    def test_get_entries_none_exist(self):
+        ...
+
+    def test_create_entry_and_get_entries(self):
+        ...
+
+    def test_delete_entry_not_exists(self):
+        ...
+
+    def test_create_and_delete_entry(self):
+        ...
+
+    def test_create_and_get_entry(self):
+        ...
 #
 #     def test_login(self, username: str, password: str):
 #
@@ -59,11 +77,3 @@ class DatabaseTest(unittest.TestCase):
 #     def test_incorrect_login(self):
 #         ...
 #
-#     def test_create_entry(self):
-#         ...
-#
-#     def test_get_entry(self):
-#         ...
-#
-#     def test_delete_entry(self):
-#         ...
