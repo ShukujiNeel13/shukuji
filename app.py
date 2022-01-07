@@ -5,6 +5,7 @@ from pprint import pformat
 from flask import (
     Flask,
     request,
+    jsonify,
     g as app_globals
 )
 
@@ -74,6 +75,32 @@ def add_entry():
     return f'New entry added (title: {title}, text: {text})'
 
 
+@APP.route('/delete', methods=['POST'])
+def delete_entry():
+    data = request.form
+    entry_id = data['entryId']
+    print(f'entryId given is: {entry_id}')
+    try:
+        db = get_db()
+        db.execute(f'delete from entries where id={entry_id}')
+        db.commit()
+    except Exception as err:
+        _err_type = type(err).__name__
+        _err_text = str(err)
+        err_info = f'{_err_type} deleting entry ID: {entry_id} ({_err_text})'
+
+        result = {
+            'success': False,
+            'text': err_info
+        }
+    else:
+        result = {
+            'success': True,
+            'text': f'Entry: {entry_id} deleted'
+        }
+    return jsonify(result)
+
+
 def get_db() -> sqlite3.Connection:
 
     if 'db' not in app_globals:
@@ -97,7 +124,7 @@ def close_db(error) -> None:
         print('DB Connection closed.')
 
 
-def _db_initialize() -> None:
+def _db_initialize() -> sqlite3.Connection:
     """
     Create and initialize database (within app context)
 
@@ -117,6 +144,7 @@ def _db_initialize() -> None:
         db.cursor().executescript(f.read())  # Executes the sql script
 
     db.commit()  # Saves the changes
+    return db
 
 
 def _db_create_connection() -> sqlite3.Connection:
@@ -132,5 +160,5 @@ def _db_create_connection() -> sqlite3.Connection:
 
 
 if __name__ == '__main__':
-    # _db_initialize()
+    _db_initialize()
     APP.run(debug=True)
