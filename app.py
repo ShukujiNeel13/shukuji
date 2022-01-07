@@ -1,4 +1,5 @@
 import os
+import sys
 import sqlite3
 from pprint import pformat
 
@@ -22,6 +23,9 @@ SCHEMA_FILENAME = 'schema.sql'
 DIR_PATH_SCHEMA_FILE = f'{DIR_PATH_PROJECT}/{SCHEMA_FILENAME}'
 
 APP.config.from_object(__name__)
+
+# TODO: Next step - Add SQLAlchemy to better manage db.
+# TODO: Add the HTML and JS to view the items on web.
 
 # App Dev Steps (After creation of respective tests, for TDD manner)
 # 1. Create Route for Index
@@ -56,6 +60,11 @@ def get_entries():
         return 'No entries in table'
 
 
+@APP.route('/get', methods=['POST'])
+def get_entry():
+    ...
+
+
 @APP.route('/add', methods=['POST'])
 def add_entry():
     db = get_db()
@@ -72,7 +81,13 @@ def add_entry():
         [title, text]
     )
     db.commit()
-    return f'New entry added (title: {title}, text: {text})'
+
+    result = {
+        'success': True,
+        'text': f'New entry added (title: {title}, text: {text})'
+    }
+
+    return jsonify(result)
 
 
 @APP.route('/delete', methods=['POST'])
@@ -113,7 +128,7 @@ def get_db() -> sqlite3.Connection:
 def close_db(error) -> None:
 
     if error:
-        print('Closing DB (on Error)...')
+        print('\nClosing DB (on Error)...', file=sys.stderr)
         print(f'Type of error is: {type(error)}')
         print(f'Error is: {error}')
     else:
@@ -130,6 +145,8 @@ def _db_initialize() -> sqlite3.Connection:
 
     :return:
     """
+
+    print('_db_initialize() called...')
 
     db = _db_create_connection()
 
@@ -155,6 +172,7 @@ def _db_create_connection() -> sqlite3.Connection:
     """
 
     _sqlite_connection = sqlite3.connect(DIR_PATH_DB)
+    print('DB connection created')
     _sqlite_connection.row_factory = sqlite3.Row
     return _sqlite_connection
 
