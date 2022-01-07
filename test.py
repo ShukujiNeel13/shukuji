@@ -10,28 +10,11 @@ import app
 # 3. Create LogicTest class for tests on the application logic (operations)
 
 
-class BasicTest(unittest.TestCase):
-
-    def test_hello_world(self):
-        print(f'\nIn {self.__class__.__name__}.test_hello_world()')
-        test_app_client = app.APP.test_client()
-
-        response = test_app_client.get('/')
-        _response_status_code = response.status_code
-        _status_text = f'Request index (/) returned status code: {_response_status_code}'
-        print(_status_text)
-
-        if response.data:
-            print(f'"data" in response is is: {response.data}')
-
-        self.assertEqual(response.status_code, 200, (_status_text))
-
-
 class DatabaseTest(unittest.TestCase):
 
     def test_db_initializer(self):
 
-        db = app.initialize_db()
+        db = app.get_db()
 
         print(f'\nIn {self.__class__.__name__}.test_database_exists()...')
 
@@ -39,22 +22,48 @@ class DatabaseTest(unittest.TestCase):
         print(f'DB file exists?: {_db_file_exists}')
         self.assertTrue(_db_file_exists, '(DB file not found)')
 
-        app.close_db(db)
 
-
-class LogicTest(unittest.TestCase):
-
-    def test_login(self):
-        ...
-
-    def test_logout(self):
-        ...
-
-    def test_create_entry(self):
-        ...
-
-    def test_get_entry(self):
-        ...
-
-    def test_delete_entry(self):
-        ...
+# class LogicTest(unittest.TestCase):
+#
+#     # TO BE UPDATED WITH ACTUAL Response to INDEX
+#     def test_index(self):
+#
+#         test_app_client = app.APP.test_client()
+#
+#         response = test_app_client.get('/', content_type="html/text")
+#         assert response.status_code == 200
+#
+#     def test_login(self, username: str, password: str):
+#
+#         test_app_client = app.APP.test_client()
+#
+#         _data = {
+#             'username': username,
+#             'password': password
+#         }
+#
+#         return test_app_client.post(
+#             '/login',
+#             data=_data,
+#             follow_redirects=True
+#         )
+#
+#     def test_logout(self):
+#
+#         test_app_client = app.APP.test_client()
+#
+#         return test_app_client.get(
+#             '/logout', follow_redirects=True
+#         )
+#
+#     def test_incorrect_login(self):
+#         ...
+#
+#     def test_create_entry(self):
+#         ...
+#
+#     def test_get_entry(self):
+#         ...
+#
+#     def test_delete_entry(self):
+#         ...
