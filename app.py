@@ -46,7 +46,7 @@ def get_entries():
     print('Request received on index')
 
     db = get_db()
-    cursor = db.execute('select * from entries order by id desc')
+    cursor = db.execute('SELECT * FROM entries ORDER BY id DESC')
     print('Obtained items from table')
     entries = cursor.fetchall()
     # print(f'Type of items from table is: {type(entries)}')
@@ -77,7 +77,7 @@ def add_entry():
     text = data['text']
     print(f'Text is: {text}')
     db.execute(
-        'insert into entries (title, text) values (?, ?)',
+        'INSERT INTO entries (title, text) VALUES (?, ?)',
         [title, text]
     )
     db.commit()
@@ -97,7 +97,7 @@ def delete_entry():
     print(f'entryId given is: {entry_id}')
     try:
         db = get_db()
-        db.execute(f'delete from entries where id={entry_id}')
+        db.execute(f'DELETE FROM entries WHERE id={entry_id}')
         db.commit()
     except Exception as err:
         _err_type = type(err).__name__
