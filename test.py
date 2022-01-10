@@ -16,19 +16,19 @@ app.APP.config['TESTING'] = True
 #  Or use the setup and teardown pattern for the test class
 
 
-class DatabaseTests(unittest.TestCase):
-
-    def test_db_init(self):
-
-        print(f'\nIn {self.__class__.__name__}.test_database_init()...')
-
-        app._db_initialize()
-
-        # region Check DB file exists
-        _db_file_exists = os.path.exists(app.DIR_PATH_DB)
-        print(f'DB file exists?: {_db_file_exists}')
-        self.assertTrue(_db_file_exists, '(DB file not found)')
-        # endregion
+# class DatabaseTests(unittest.TestCase):
+#
+#     def test_db_init(self):
+#
+#         print(f'\nIn {self.__class__.__name__}.test_database_init()...')
+#
+#         app._db_initialize()
+#
+#         # region Check DB file exists
+#         _db_file_exists = os.path.exists(app.DIR_PATH_DB)
+#         print(f'DB file exists?: {_db_file_exists}')
+#         self.assertTrue(_db_file_exists, '(DB file not found)')
+#         # endregion
 
 
 class UseCaseTests(unittest.TestCase):
@@ -42,6 +42,8 @@ class UseCaseTests(unittest.TestCase):
         :return:
         """
 
+        print('\nIn setUp()...')
+
         self.app = app.APP.test_client()
         self.db_connection = app._db_initialize()
 
@@ -54,14 +56,18 @@ class UseCaseTests(unittest.TestCase):
         :return:
         """
 
-        self.db_connection.execute('DELETE FROM entries;')
+        print('\nIn tearDown()...')
 
-    def test_get_entries_none_exist(self):
+        _db_path = app.DIR_PATH_DB
+        print(f'DB path is: {_db_path}')
 
-        print(f'\nIn {self.__class__.__name__}.test_get_entries_none_exist()...')
+        # self.db_connection.execute('DELETE FROM entries;')
 
-        response = app.APP.test_client().get('/')
-        assert b'No entries in table' in response.data
+    def test_db_file_exists(self):
+
+        _db_file_exists = os.path.exists(app.DIR_PATH_DB)
+        print(f'DB file exists?: {_db_file_exists}')
+        self.assertTrue(_db_file_exists, '(DB file not found)')
 
     def test_create_entry(self):
 
@@ -89,17 +95,28 @@ class UseCaseTests(unittest.TestCase):
         )
         # endregion
 
-    def test_create_entry_and_get_entries(self):
-        pass
+    def test_get_entries_none_exist(self):
 
-    def test_delete_entry_not_exists(self):
-        pass
+        print(f'\nIn {self.__class__.__name__}.test_get_entries_none_exist()...')
 
-    def test_create_and_delete_entry(self):
-        pass
+        response = app.APP.test_client().get('/')
+        print('response data is:')
+        print(response.data)
+        assert b'No entries in table' in response.data
 
-    def test_create_and_get_entry(self):
-        pass
+    #
+    # def test_create_entry_and_get_entries(self):
+    #     pass
+    #
+    # def test_delete_entry_not_exists(self):
+    #     pass
+    #
+    # def test_create_and_delete_entry(self):
+    #     pass
+    #
+    # def test_create_and_get_entry(self):
+    #     pass
+
 #
 #     def test_login(self, username: str, password: str):
 #
