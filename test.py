@@ -64,8 +64,6 @@ class UseCaseTests(unittest.TestCase):
         )
         # endregion
 
-        response_get_entries = APP_CLIENT.get('/')
-
     def test_create_entry_and_get_entries(self):
         pass
 
