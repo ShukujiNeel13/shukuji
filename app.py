@@ -52,7 +52,20 @@ def get_entries():
 
 @APP.route('/get', methods=['POST'])
 def get_entry():
-    ...
+    _request_path = request.path
+    print(f'Request received on path: {_request_path}')
+
+    form_data = request.form
+    print('Form data given is:')
+    print(form_data)
+
+    entry_id = form_data['entryId']
+    print(f'entryId given is: {entry_id}')
+
+    # db = get_db()
+    #
+    # db.cursor = db.execute(f'SELECT * FROM entries WHERE id={entry_id}')
+    # db.commit()
 
 
 @APP.route('/add', methods=['POST'])
@@ -165,8 +178,3 @@ def _db_create_connection() -> sqlite3.Connection:
     print('DB connection created')
     _sqlite_connection.row_factory = sqlite3.Row
     return _sqlite_connection
-
-
-if __name__ == '__main__':
-    _db_initialize()
-    APP.run(debug=True)
