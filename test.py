@@ -62,7 +62,7 @@ class UseCaseTests(unittest.TestCase):
         _text_of_test_entry = 'Random Entry No. 1'
 
         # region Test Create Entry
-        response = app.APP.test_client().post(
+        response = self.app.post(
             '/add',
             data={
                 'title': _title_of_test_entry,
@@ -84,7 +84,7 @@ class UseCaseTests(unittest.TestCase):
 
         print(f'\nIn {self.__class__.__name__}.test_get_entries_none_exist()...')
 
-        response = app.APP.test_client().get('/')
+        response = self.app.get('/')
         print('response data is:')
         print(response.data)
         assert b'No entries in table' in response.data
