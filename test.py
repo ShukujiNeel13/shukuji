@@ -30,23 +30,23 @@ class UseCaseTests(unittest.TestCase):
         print('\nIn setUp()...')
 
         self.app = app.APP.test_client()
-        self.db_connection = app._db_initialize()
+        # self.db_connection = app.get_db()
+        app._db_initialize()
+        # This Creates the desired tables (if not already)
 
-    def tearDown(self) -> None:
-        """
-        Runs after every test function in this class
-
-        1. Clear the test database
-
-        :return:
-        """
-
-        print('\nIn tearDown()...')
-
-        _db_path = app.DIR_PATH_DB
-        print(f'DB path is: {_db_path}')
-
-        # self.db_connection.execute('DELETE FROM entries;')
+    # def tearDown(self) -> None:
+    #     """
+    #     Runs after every test function in this class
+    #
+    #     1. Clear the test database
+    #
+    #     :return:
+    #     """
+    #
+    #     print('\nIn tearDown()...')
+    #     self.db_connection.execute('DROP TABLE IF EXISTS entries;')
+    #     self.db_connection.commit()
+    #     print('Entries Table dropped')
 
     def test_db_file_exists(self):
 

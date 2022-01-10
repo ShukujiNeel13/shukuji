@@ -30,6 +30,8 @@ APP.config.from_object(__name__)
 
 # TODO: How to check current number of connections to SQLite DB?
 
+# TODO: every db. operation must be inside try catch to catch the errors
+
 
 @APP.route('/')
 def get_entries():
@@ -129,6 +131,7 @@ def get_db() -> sqlite3.Connection:
 
 @APP.teardown_appcontext
 def close_db(error) -> None:
+    """This function executes after each request completed or failed."""
 
     if error:
         print('\nClosing DB (on Error)...', file=sys.stderr)
@@ -142,16 +145,20 @@ def close_db(error) -> None:
         print('DB Connection closed.')
 
 
+# TODO: How to : This must be executed only once during app lifecycle
 def _db_initialize() -> sqlite3.Connection:
     """
-    Create and initialize database (within app context)
+    Executes script to create desired tables in database
 
+    This must be executed only once during the app lifecycle
+
+    :param db_connection: Connection to the SQL database
     :return:
     """
 
     print('_db_initialize() called...')
 
-    db = _db_create_connection()
+    db_connection = _db_create_connection()
 
     # with APP.open_resource(SCHEMA_FILENAME, mode='r'):
     #     ...
@@ -161,10 +168,11 @@ def _db_initialize() -> sqlite3.Connection:
     # use the above with APP.open_resource() pattern
 
     with open(DIR_PATH_SCHEMA_FILE, mode='r') as f:
-        db.cursor().executescript(f.read())  # Executes the sql script
+        db_connection.cursor().executescript(f.read())  # Executes the sql script
 
-    db.commit()  # Saves the changes
-    return db
+    db_connection.commit()  # Saves the changes
+    # db_connection.close()
+    return db_connection
 
 
 def _db_create_connection() -> sqlite3.Connection:
@@ -178,3 +186,9 @@ def _db_create_connection() -> sqlite3.Connection:
     print('DB connection created')
     _sqlite_connection.row_factory = sqlite3.Row
     return _sqlite_connection
+
+
+# TODO: remove below statement after launch / run scripts are ready.
+if __name__ == '__main__':
+    _db_initialize()  # WARNING: Call only once during app
+    APP.run(debug=True)
