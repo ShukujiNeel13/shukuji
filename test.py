@@ -4,13 +4,15 @@ import unittest
 import app
 
 
-APP_CLIENT = app.APP.test_client()
-
-
 # Steps for Creation of Tests (in TDD manner)
 # 1. Create BasicTest class, for most fundamental tests (eg test route index)
 # 2. Create DatabaseTest class for tests on database
 # 3. Create LogicTest class for tests on the application logic (operations)
+
+
+# TODO: Any exception or error in test must teardown app context
+#  So that the DB is reset (otherwise future tests are affected)
+#  Or use the setup and teardown pattern for the test class
 
 
 class DatabaseTests(unittest.TestCase):
@@ -33,7 +35,7 @@ class UseCaseTests(unittest.TestCase):
 
         print(f'\nIn {self.__class__.__name__}.test_get_entries_none_exist()...')
 
-        response = APP_CLIENT.get('/')
+        response = app.APP.test_client().get('/')
         assert b'No entries in table' in response.data
 
     def test_create_entry(self):
@@ -44,7 +46,7 @@ class UseCaseTests(unittest.TestCase):
         _text_of_test_entry = 'Random Entry No. 1'
 
         # region Test Create Entry
-        response = APP_CLIENT.post(
+        response = app.APP.test_client().post(
             '/add',
             data={
                 'title': _title_of_test_entry,
