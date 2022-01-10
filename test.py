@@ -2,6 +2,7 @@ import os.path
 import unittest
 
 import app
+app.APP.config['TESTING'] = True
 
 
 # Steps for Creation of Tests (in TDD manner)
@@ -23,6 +24,7 @@ class DatabaseTests(unittest.TestCase):
 
         app._db_initialize()
 
+        # region Check DB file exists
         _db_file_exists = os.path.exists(app.DIR_PATH_DB)
         print(f'DB file exists?: {_db_file_exists}')
         self.assertTrue(_db_file_exists, '(DB file not found)')
@@ -30,6 +32,29 @@ class DatabaseTests(unittest.TestCase):
 
 
 class UseCaseTests(unittest.TestCase):
+
+    def setUp(self) -> None:
+        """
+        Runs before every test function in this class
+
+        1. Initializes a new test database
+
+        :return:
+        """
+
+        self.app = app.APP.test_client()
+        self.db_connection = app._db_initialize()
+
+    def tearDown(self) -> None:
+        """
+        Runs after every test function in this class
+
+        1. Clear the test database
+
+        :return:
+        """
+
+        self.db_connection.execute('DELETE FROM entries;')
 
     def test_get_entries_none_exist(self):
 
