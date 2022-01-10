@@ -24,19 +24,17 @@ class DatabaseTests(unittest.TestCase):
         _db_file_exists = os.path.exists(app.DIR_PATH_DB)
         print(f'DB file exists?: {_db_file_exists}')
         self.assertTrue(_db_file_exists, '(DB file not found)')
-
-    def test_empty_db(self):
-
-        print(f'\n In {self.__class__.__name__}.test_empty_db()...')
-
-        test_app_client = app.APP.test_client()
-        response = test_app_client.get('/')
-        response_data = response.data
-        assert b'No entries in table' in response_data
-        print(f'Response data is: {response_data}')
+        # endregion
 
 
 class UseCaseTests(unittest.TestCase):
+
+    def test_get_entries_none_exist(self):
+
+        print(f'\nIn {self.__class__.__name__}.test_get_entries_none_exist()...')
+
+        response = APP_CLIENT.get('/')
+        assert b'No entries in table' in response.data
 
     def test_create_entry(self):
 
