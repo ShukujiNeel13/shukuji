@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import sqlite3
@@ -44,6 +45,13 @@ def get_entries():
     # print(f'Type of items from table is: {type(entries)}')
     print(pformat(entries))  # a list of entries
 
+    for entry_row_obj in entries:
+        print('Keys of row are:')
+        print(entry_row_obj.keys())
+        print(f'ID of key is: {entry_row_obj["id"]}')
+        print(f'Title of key is: {entry_row_obj["title"]}')
+        print(f'Title of key is: {entry_row_obj["text"]}')
+
     if entries:
         no_of_entries = len(entries)
         print(f'{no_of_entries} entries in table: entries')
@@ -64,10 +72,38 @@ def get_entry():
     entry_id = form_data['entryId']
     print(f'entryId given is: {entry_id}')
 
-    # db = get_db()
-    #
-    # db.cursor = db.execute(f'SELECT * FROM entries WHERE id={entry_id}')
-    # db.commit()
+    db = get_db()
+    try:
+        db_cursor = db.execute(f'SELECT * FROM entries WHERE id={entry_id}')
+    except Exception as err:
+        _err_type = type(err).__name__
+        _err_text = str(err)
+        print(f'Error type: {_err_type}')
+        print(f'Error text: {_err_text}')
+        result = {
+            'success': False,
+            'text': f'{_err_type} getting entry (ID: {entry_id}) ({_err_text})'
+        }
+    else:
+        desired_entry_in_list = db_cursor.fetchone()
+        print(f'db_cursor.fetchone() type: {type(desired_entry_in_list)} is: {desired_entry_in_list}')
+        entry_id = desired_entry_in_list['id']
+        entry_title = desired_entry_in_list['title']
+        entry_text = desired_entry_in_list['text']
+        print(f'Entry id is: {entry_id}')
+        print(f'Entry title is: {entry_title}')
+        print(f'Entry text is: {entry_text}')
+        result = {
+            'success': True,
+            'text': f'Obtained entry with given id: {entry_id}'
+        }
+
+    return jsonify(result)
+
+    # data_return = {
+    #     'success': True,
+    #     'text': ''
+    # }
 
 
 @APP.route('/add', methods=['POST'])
@@ -107,7 +143,7 @@ def delete_entry():
     except Exception as err:
         _err_type = type(err).__name__
         _err_text = str(err)
-        err_info = f'{_err_type} deleting entry ID: {entry_id} ({_err_text})'
+        err_info = f'{_err_type} deleting entry with id: {entry_id} ({_err_text})'
 
         result = {
             'success': False,
@@ -116,7 +152,7 @@ def delete_entry():
     else:
         result = {
             'success': True,
-            'text': f'Entry: {entry_id} deleted'
+            'text': f'Entry with entryId: {entry_id} deleted'
         }
     return jsonify(result)
 

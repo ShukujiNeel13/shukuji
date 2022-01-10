@@ -54,9 +54,17 @@ class UseCaseTests(unittest.TestCase):
         print(f'DB file exists?: {_db_file_exists}')
         self.assertTrue(_db_file_exists, '(DB file not found)')
 
-    def test_create_entry(self):
+    def test_get_entries_none_exist(self):
 
-        print(f'\nIn {self.__class__.__name__}.test_create_entity()...')
+        print(f'\nIn {self.__class__.__name__}.test_get_entries_none_exist()...')
+
+        response = self.app.get('/')
+        print('response data is:')
+        print(response.data)
+        assert b'No entries in table' in response.data
+
+    def test_create_and_delete_entry(self):
+        print(f'\nIn {self.__class__.__name__}.create_and_delete_entry()...')
 
         _title_of_test_entry = 'Test Entry 1'
         _text_of_test_entry = 'Random Entry No. 1'
@@ -80,18 +88,93 @@ class UseCaseTests(unittest.TestCase):
         )
         # endregion
 
-    def test_get_entries_none_exist(self):
+        print('Testing Delete ...')
+        delete_response = self.app.post(
+            '/delete',
+            data={'entryId': 1}
+        )
 
-        print(f'\nIn {self.__class__.__name__}.test_get_entries_none_exist()...')
+        print(f'Delete response is:\n{delete_response.json}')
 
-        response = self.app.get('/')
-        print('response data is:')
-        print(response.data)
-        assert b'No entries in table' in response.data
+        self.assertTrue(delete_response.json['success'])
 
+    def test_create_and_get_entry(self):
+        print(f'\nIn {self.__class__.__name__}.create_and_delete_entry()...')
+
+        _title_of_test_entry = 'Test Entry 1'
+        _text_of_test_entry = 'Random Entry No. 1'
+
+        # region Test Create Entry
+        response = self.app.post(
+            '/add',
+            data={
+                'title': _title_of_test_entry,
+                'text': _text_of_test_entry
+            }
+        )
+
+        print(f'Response is: {response}')
+
+        response_data = response.json
+        self.assertTrue(response_data['success'])
+        self.assertEqual(
+            response_data['text'],
+            f'New entry added (title: {_title_of_test_entry}, text: {_text_of_test_entry})'
+        )
+        # endregion
+
+        print('Testing Get ...')
+        get_response = self.app.post(
+            '/get',
+            data={'entryId': 1}
+        )
+
+        print(f'get response is:\n{get_response.json}')
+
+        self.assertTrue(get_response.json['success'])
+
+
+    # def test_get_entry_does_not_exist(self):
+    #
+    #     random_entry_id = 'randomEntryId'
+    #     response = self.app.post(
+    #         '/get',
+    #         data={'entryId': random_entry_id}
+    #     )
+    #
+    #     _response_data = response.data
+    #     print(f'Response data is: {_response_data}')
+    #     assert b'Entry does not exist' in _response_data
+
+    # def test_create_entry_and_get_entry(self):
+    #
+    #     print(f'\nIn {self.__class__.__name__}.test_create_entity()...')
+    #
+    #     _title_of_test_entry = 'Test Entry 1'
+    #     _text_of_test_entry = 'Random Entry No. 1'
+    #
+    #     # region Test Create Entry
+    #     response = self.app.post(
+    #         '/add',
+    #         data={
+    #             'title': _title_of_test_entry,
+    #             'text': _text_of_test_entry
+    #         }
+    #     )
+    #
+    #     print(f'Response is: {response}')
+    #
+    #     response_data = response.json
+    #     self.assertTrue(response_data['success'])
+    #     self.assertEqual(
+    #         response_data['text'],
+    #         f'New entry added (title: {_title_of_test_entry}, text: {_text_of_test_entry})'
+    #     )
+    #     # endregion
     #
     # def test_create_entry_and_get_entries(self):
     #     pass
+
     #
     # def test_delete_entry_not_exists(self):
     #     pass
