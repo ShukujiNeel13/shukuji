@@ -86,17 +86,23 @@ def get_entry():
         }
     else:
         desired_entry_in_list = db_cursor.fetchone()
-        print(f'db_cursor.fetchone() type: {type(desired_entry_in_list)} is: {desired_entry_in_list}')
-        entry_id = desired_entry_in_list['id']
-        entry_title = desired_entry_in_list['title']
-        entry_text = desired_entry_in_list['text']
-        print(f'Entry id is: {entry_id}')
-        print(f'Entry title is: {entry_title}')
-        print(f'Entry text is: {entry_text}')
-        result = {
-            'success': True,
-            'text': f'Obtained entry with given id: {entry_id}'
-        }
+        if desired_entry_in_list is None:
+            result = {
+                'success': False,
+                'text': 'This entry does not exist'
+            }
+        else:
+            print(f'db_cursor.fetchone() type: {type(desired_entry_in_list)} is: {desired_entry_in_list}')
+            entry_id = desired_entry_in_list['id']
+            entry_title = desired_entry_in_list['title']
+            entry_text = desired_entry_in_list['text']
+            print(f'Entry id is: {entry_id}')
+            print(f'Entry title is: {entry_title}')
+            print(f'Entry text is: {entry_text}')
+            result = {
+                'success': True,
+                'text': f'Obtained entry with given id: {entry_id}'
+            }
 
     return jsonify(result)
 
@@ -131,6 +137,7 @@ def add_entry():
     return jsonify(result)
 
 
+# Note: Delete SQL command completes even if no records are deleted
 @APP.route('/delete', methods=['POST'])
 def delete_entry():
     data = request.form
@@ -181,7 +188,6 @@ def close_db(error) -> None:
         print('DB Connection closed.')
 
 
-# TODO: How to : This must be executed only once during app lifecycle
 def _db_initialize() -> sqlite3.Connection:
     """
     Executes script to create desired tables in database
