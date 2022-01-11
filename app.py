@@ -137,7 +137,7 @@ def add_entity():
     _request_path = request.path
     print(f'Request received on path: {_request_path}')
 
-    db = get_db()
+    # db = get_db()
     # data = request.data
     data = request.form
     # print(f'Request data (Type: {type(data)}) is:')
@@ -146,11 +146,10 @@ def add_entity():
     print(f'Title is: {title}')
     text = data['text']
     print(f'Text is: {text}')
-    db.execute(
-        'INSERT INTO Entity (title, text) VALUES (?, ?)',
-        [title, text]
-    )
-    db.commit()
+
+    entity = Entity(title=title, text=text)
+    DB.session.add(entity)
+    DB.session.commit()
 
     result = {
         'success': True,
