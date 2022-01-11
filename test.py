@@ -11,8 +11,8 @@ app.APP.config['TESTING'] = True
 
 # TODO: How to reuse portion of code in multiple tests.
 
-
-class UseCaseTests(unittest.TestCase):
+# TODO: Reuse the DB connection inside the test class
+class EntityTest(unittest.TestCase):
 
     def setUp(self) -> None:
         """
@@ -23,77 +23,61 @@ class UseCaseTests(unittest.TestCase):
         :return:
         """
 
-        print('\nIn setUp()...')
-
         self.app = app.APP.test_client()
-        # self.db_connection = app.get_db()
         app._db_initialize()
-        # This Creates the desired tables (if not already)
-
-    # def tearDown(self) -> None:
-    #     """
-    #     Runs after every test function in this class
-    #
-    #     1. Clear the test database
-    #
-    #     :return:
-    #     """
-    #
-    #     print('\nIn tearDown()...')
-    #     self.db_connection.execute('DROP TABLE IF EXISTS entries;')
-    #     self.db_connection.commit()
-    #     print('Entries Table dropped')
 
     def test_db_file_exists(self):
 
         _db_file_exists = os.path.exists(app.DIR_PATH_DB)
-        print(f'DB file exists?: {_db_file_exists}')
         self.assertTrue(_db_file_exists, '(DB file not found)')
 
-    def test_get_entries_none_exist(self):
+    # region Tests for generic Entity
 
-        print(f'\nIn {self.__class__.__name__}.test_get_entries_none_exist()...')
+    def test_get_entities_none_exist(self):
 
         response = self.app.get('/')
-        print('response data is:')
-        print(response.data)
         assert b'No entries in table' in response.data
 
-    def test_create_and_delete_entry(self):
-        print(f'\nIn {self.__class__.__name__}.create_and_delete_entry()...')
+    def test_add_entity(self, data: dict = None):
 
-        _title_of_test_entry = 'Test Entry 1'
-        _text_of_test_entry = 'Random Entry No. 1'
+        if data is None:
+            data = {
+                'title': 'Test Entry 1',
+                'text': 'Random Entry No. 1'
+            }
 
-        # region Test Create Entry
         response = self.app.post(
             '/add',
-            data={
-                'title': _title_of_test_entry,
-                'text': _text_of_test_entry
-            }
+            data=data
         )
 
         response_data = response.json
         self.assertTrue(response_data['success'])
-        self.assertEqual(
-            response_data['text'],
-            f'New entry added (title: {_title_of_test_entry}, text: {_text_of_test_entry})'
+
+    def test_add_and_delete_entity(self):
+
+        # region Add entity
+        entity_data = {
+            'title': 'Test Entry 1',
+            'text': 'Random Entry No. 1'
+        }
+
+        self.app.post(
+            '/add',
+            data=entity_data
         )
         # endregion
 
-        print('Testing Delete ...')
+        # region Test delete the entity added
         delete_response = self.app.post(
             '/delete',
             data={'entryId': 1}
         )
 
-        print(f'Delete response is:\n{delete_response.json}')
-
         self.assertTrue(delete_response.json['success'])
+        # endregion
 
-    def test_get_entry_does_not_exist(self):
-        print(f'\nIn {self.__class__.__name__}.test_get_entry_does_not_exist()...')
+    def test_get_entity_does_not_exist(self):
 
         get_response = self.app.post(
             '/get',
@@ -101,71 +85,47 @@ class UseCaseTests(unittest.TestCase):
         )
 
         _response_data = get_response.json
-        print(f'get response is:\n{_response_data}')
         self.assertFalse(_response_data['success'])
         self.assertEqual('This entry does not exist', _response_data['text'])
 
-    def test_create_and_get_entry(self):
-        print(f'\nIn {self.__class__.__name__}.create_and_delete_entry()...')
+    def test_add_and_get_entity(self):
 
-        _title_of_test_entry = 'Test Entry 1'
-        _text_of_test_entry = 'Random Entry No. 1'
+        # region Add entity
+        entity_data = {
+            'title': 'Test Entry 1',
+            'text': 'Random Entry No. 1'
+        }
 
-        # region Test Create Entry
-        response = self.app.post(
+        self.app.post(
             '/add',
-            data={
-                'title': _title_of_test_entry,
-                'text': _text_of_test_entry
-            }
-        )
-
-        print(f'Response is: {response}')
-
-        response_data = response.json
-        self.assertTrue(response_data['success'])
-        self.assertEqual(
-            response_data['text'],
-            f'New entry added (title: {_title_of_test_entry}, text: {_text_of_test_entry})'
+            data=entity_data
         )
         # endregion
 
-        print('Testing Get ...')
+        # region Test get the entity added
         get_response = self.app.post(
             '/get',
             data={'entryId': 1}
         )
 
-        print(f'get response is:\n{get_response.json}')
-
         self.assertTrue(get_response.json['success'])
+        # endregion
 
-    def test_create_and_get_entries(self):
-        print(f'\nIn {self.__class__.__name__}.create_and_get_entries()...')
+    def test_add_and_get_entities(self):
 
-        _title_of_test_entry = 'Test Entry 1'
-        _text_of_test_entry = 'Random Entry No. 1'
+        # region Add entity
+        entity_data = {
+            'title': 'Test Entry 1',
+            'text': 'Random Entry No. 1'
+        }
 
-        # region Test Create Entry
-        response = self.app.post(
+        self.app.post(
             '/add',
-            data={
-                'title': _title_of_test_entry,
-                'text': _text_of_test_entry
-            }
-        )
-
-        print(f'Response is: {response}')
-
-        response_data = response.json
-        self.assertTrue(response_data['success'])
-        self.assertEqual(
-            response_data['text'],
-            f'New entry added (title: {_title_of_test_entry}, text: {_text_of_test_entry})'
+            data=entity_data
         )
         # endregion
 
-        print('Testing Get ...')
         get_response = self.app.get('/')
-
         assert b'1 entries in table: entries' in get_response.data
+
+    # endregion
