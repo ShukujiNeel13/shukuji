@@ -40,7 +40,19 @@ DIR_PATH_SCHEMA_FILE = f'{DIR_PATH_PROJECT}/{SCHEMA_FILENAME}'
 
 class Entity(DB.Model):
 
-    print('In Class Entity')
+    """
+
+    constructor not required as it is defined by SQLAlchemy,
+    which accepts kwargs for all its columns and relationships.
+
+    If you override this constructor, please accept kwargs,
+    and call the super constructor and pass it the kwargs
+
+    example:
+    def __init__(self, **kwargs):
+      super(some_argument, self).__init__(**kwargs)
+    """
+
     id = DB.Column(DB.Integer, primary_key=True, autoincrement=True)
     title = DB.Column(DB.Text, nullable=False)
     text = DB.Column(DB.Text, nullable=False)
@@ -54,6 +66,10 @@ def hello_world():
 
     return 'Hello World'
 
+
+# region Routes for entity - these can become one route
+# The route is '/entity' and depending on the further path the action is decided
+#  Basically like a route group
 
 @APP.route('/entity/')
 def get_entities():
@@ -160,6 +176,7 @@ def delete_entity():
             'text': f'record deleted'
         }
     return jsonify(result)
+# endregion
 
 
 def get_db() -> sqlite3.Connection:
