@@ -135,6 +135,6 @@ class EntityTest(unittest.TestCase):
         # endregion
 
         get_response = self.app.get('/entity/')
-        assert b'1 records in table' in get_response.data
+        self.assertIn(b'1 records in table', get_response.data)
 
     # endregion
