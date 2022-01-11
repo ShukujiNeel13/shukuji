@@ -133,6 +133,36 @@ class UseCaseTests(unittest.TestCase):
 
         self.assertTrue(get_response.json['success'])
 
+    def test_create_and_get_entries(self):
+        print(f'\nIn {self.__class__.__name__}.create_and_get_entries()...')
+
+        _title_of_test_entry = 'Test Entry 1'
+        _text_of_test_entry = 'Random Entry No. 1'
+
+        # region Test Create Entry
+        response = self.app.post(
+            '/add',
+            data={
+                'title': _title_of_test_entry,
+                'text': _text_of_test_entry
+            }
+        )
+
+        print(f'Response is: {response}')
+
+        response_data = response.json
+        self.assertTrue(response_data['success'])
+        self.assertEqual(
+            response_data['text'],
+            f'New entry added (title: {_title_of_test_entry}, text: {_text_of_test_entry})'
+        )
+        # endregion
+
+        print('Testing Get ...')
+        get_response = self.app.get('/')
+
+        assert b'1 entries in table: entries' in get_response.data
+
 
     # def test_get_entry_does_not_exist(self):
     #
