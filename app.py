@@ -60,16 +60,7 @@ def get_entities():
     _request_path = request.path
     print(f'Request received on path: {_request_path}')
 
-    db = get_db()
-    cursor = db.execute('SELECT * FROM Entity ORDER BY id DESC')
-    entities = cursor.fetchall()
-
-    # for entry_row_obj in entries:
-    #     print('Keys of row are:')
-    #     print(entry_row_obj.keys())
-    #     print(f'ID of key is: {entry_row_obj["id"]}')
-    #     print(f'Title of key is: {entry_row_obj["title"]}')
-    #     print(f'Title of key is: {entry_row_obj["text"]}')
+    entities = Entity.query.all()
 
     if entities:
         no_of_entries = len(entities)
@@ -91,37 +82,18 @@ def get_entity():
     entry_id = form_data['entryId']
     print(f'entryId given is: {entry_id}')
 
-    db = get_db()
-    try:
-        db_cursor = db.execute(f'SELECT * FROM Entity WHERE id={entry_id}')
-    except Exception as err:
-        _err_type = type(err).__name__
-        _err_text = str(err)
-        print(f'Error type: {_err_type}')
-        print(f'Error text: {_err_text}')
+    desired_entity = Entity.query.filter_by(id=entry_id).first()
+
+    if desired_entity is None:
         result = {
             'success': False,
-            'text': f'{_err_type} getting entry (ID: {entry_id}) ({_err_text})'
+            'text': 'This entry does not exist'
         }
     else:
-        desired_entry_in_list = db_cursor.fetchone()
-        if desired_entry_in_list is None:
-            result = {
-                'success': False,
-                'text': 'This entry does not exist'
-            }
-        else:
-            print(f'db_cursor.fetchone() type: {type(desired_entry_in_list)} is: {desired_entry_in_list}')
-            entry_id = desired_entry_in_list['id']
-            entry_title = desired_entry_in_list['title']
-            entry_text = desired_entry_in_list['text']
-            print(f'Entry id is: {entry_id}')
-            print(f'Entry title is: {entry_title}')
-            print(f'Entry text is: {entry_text}')
-            result = {
-                'success': True,
-                'text': f'Obtained entry with given id: {entry_id}'
-            }
+        result = {
+            'success': True,
+            'text': f'Obtained entry with given id: {entry_id}'
+        }
 
     return jsonify(result)
 
