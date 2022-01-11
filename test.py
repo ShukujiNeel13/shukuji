@@ -5,12 +5,6 @@ import app
 app.APP.config['TESTING'] = True
 
 
-# Steps for Creation of Tests (in TDD manner)
-# 1. Create BasicTest class, for most fundamental tests (eg test route index)
-# 2. Create DatabaseTest class for tests on database
-# 3. Create LogicTest class for tests on the application logic (operations)
-
-
 # TODO: Any exception or error in test must teardown app context
 #  So that the DB is reset (otherwise future tests are affected)
 #  Or use the setup and teardown pattern for the test class
