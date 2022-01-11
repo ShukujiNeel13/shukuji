@@ -98,6 +98,19 @@ class UseCaseTests(unittest.TestCase):
 
         self.assertTrue(delete_response.json['success'])
 
+    def test_get_entry_does_not_exist(self):
+        print(f'\nIn {self.__class__.__name__}.test_get_entry_does_not_exist()...')
+
+        get_response = self.app.post(
+            '/get',
+            data={'entryId': 1}
+        )
+
+        _response_data = get_response.json
+        print(f'get response is:\n{_response_data}')
+        self.assertFalse(_response_data['success'])
+        self.assertEqual('This entry does not exist', _response_data['text'])
+
     def test_create_and_get_entry(self):
         print(f'\nIn {self.__class__.__name__}.create_and_delete_entry()...')
 
