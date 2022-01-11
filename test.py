@@ -15,6 +15,8 @@ app.APP.config['TESTING'] = True
 #  So that the DB is reset (otherwise future tests are affected)
 #  Or use the setup and teardown pattern for the test class
 
+# TODO: How to reuse portion of code in multiple tests.
+
 
 class UseCaseTests(unittest.TestCase):
 
@@ -77,8 +79,6 @@ class UseCaseTests(unittest.TestCase):
                 'text': _text_of_test_entry
             }
         )
-
-        print(f'Response is: {response}')
 
         response_data = response.json
         self.assertTrue(response_data['success'])
