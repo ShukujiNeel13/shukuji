@@ -11,19 +11,23 @@ from flask import (
     g as app_globals
 )
 
-APP = Flask(__name__)
-
+from flask_sqlalchemy import SQLAlchemy
 
 DIR_PATH_PROJECT = os.path.dirname(os.path.abspath(__name__))
-print(f'DIR_PATH_PROJECT is: {DIR_PATH_PROJECT}')
+# print(f'DIR_PATH_PROJECT is: {DIR_PATH_PROJECT}')
 
 DB_NAME = 'shuku-store.db'
 DIR_PATH_DB = f'{DIR_PATH_PROJECT}/{DB_NAME}'
 
+
+APP = Flask(__name__)
+APP.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:////{DIR_PATH_DB}'
+DB = SQLAlchemy(APP)
+
 SCHEMA_FILENAME = 'schema.sql'
 DIR_PATH_SCHEMA_FILE = f'{DIR_PATH_PROJECT}/{SCHEMA_FILENAME}'
 
-APP.config.from_object(__name__)
+# APP.config.from_object(__name__)
 
 # TODO: Next step - Add SQLAlchemy to better manage db.
 # TODO: Add the HTML and JS to view the items on web.
@@ -34,34 +38,49 @@ APP.config.from_object(__name__)
 # TODO: every db. operation must be inside try catch to catch the errors
 
 
+class Entity(DB.Model):
+
+    print('In Class Entity')
+    id = DB.Column(DB.Integer, primary_key=True, autoincrement=True)
+    title = DB.Column(DB.Text, nullable=False)
+    text = DB.Column(DB.Text, nullable=False)
+
+    def __repr__(self):
+        return f'{self.__class__.__name__} {self.title}'
+
+
 @APP.route('/')
-def get_entries():
-    print('Request received on index')
+def hello_world():
+
+    return 'Hello World'
+
+
+@APP.route('/entity/')
+def get_entities():
+    _request_path = request.path
+    print(f'Request received on path: {_request_path}')
 
     db = get_db()
-    cursor = db.execute('SELECT * FROM entries ORDER BY id DESC')
-    print('Obtained items from table')
-    entries = cursor.fetchall()
-    # print(f'Type of items from table is: {type(entries)}')
-    print(pformat(entries))  # a list of entries
+    cursor = db.execute('SELECT * FROM Entity ORDER BY id DESC')
+    entities = cursor.fetchall()
 
-    for entry_row_obj in entries:
-        print('Keys of row are:')
-        print(entry_row_obj.keys())
-        print(f'ID of key is: {entry_row_obj["id"]}')
-        print(f'Title of key is: {entry_row_obj["title"]}')
-        print(f'Title of key is: {entry_row_obj["text"]}')
+    # for entry_row_obj in entries:
+    #     print('Keys of row are:')
+    #     print(entry_row_obj.keys())
+    #     print(f'ID of key is: {entry_row_obj["id"]}')
+    #     print(f'Title of key is: {entry_row_obj["title"]}')
+    #     print(f'Title of key is: {entry_row_obj["text"]}')
 
-    if entries:
-        no_of_entries = len(entries)
-        print(f'{no_of_entries} entries in table: entries')
-        return f'{no_of_entries} entries in table: entries'
+    if entities:
+        no_of_entries = len(entities)
+        print(f'{no_of_entries} records in table')
+        return f'{no_of_entries} records in table'
     else:
-        return 'No entries in table'
+        return 'No records in table'
 
 
-@APP.route('/get', methods=['POST'])
-def get_entry():
+@APP.route('/entity/get', methods=['POST'])
+def get_entity():
     _request_path = request.path
     print(f'Request received on path: {_request_path}')
 
@@ -74,7 +93,7 @@ def get_entry():
 
     db = get_db()
     try:
-        db_cursor = db.execute(f'SELECT * FROM entries WHERE id={entry_id}')
+        db_cursor = db.execute(f'SELECT * FROM Entity WHERE id={entry_id}')
     except Exception as err:
         _err_type = type(err).__name__
         _err_text = str(err)
@@ -112,8 +131,12 @@ def get_entry():
     # }
 
 
-@APP.route('/add', methods=['POST'])
-def add_entry():
+@APP.route('/entity/add', methods=['POST'])
+def add_entity():
+
+    _request_path = request.path
+    print(f'Request received on path: {_request_path}')
+
     db = get_db()
     # data = request.data
     data = request.form
@@ -124,7 +147,7 @@ def add_entry():
     text = data['text']
     print(f'Text is: {text}')
     db.execute(
-        'INSERT INTO entries (title, text) VALUES (?, ?)',
+        'INSERT INTO Entity (title, text) VALUES (?, ?)',
         [title, text]
     )
     db.commit()
@@ -138,19 +161,23 @@ def add_entry():
 
 
 # Note: Delete SQL command completes even if no records are deleted
-@APP.route('/delete', methods=['POST'])
-def delete_entry():
+@APP.route('/entity/delete', methods=['POST'])
+def delete_entity():
+
+    _request_path = request.path
+    print(f'Request received on path: {_request_path}')
+
     data = request.form
     entry_id = data['entryId']
     print(f'entryId given is: {entry_id}')
     try:
         db = get_db()
-        db.execute(f'DELETE FROM entries WHERE id={entry_id}')
+        db.execute(f'DELETE FROM Entity WHERE id={entry_id}')
         db.commit()
     except Exception as err:
         _err_type = type(err).__name__
         _err_text = str(err)
-        err_info = f'{_err_type} deleting entry with id: {entry_id} ({_err_text})'
+        err_info = f'{_err_type} deleting record with id: {entry_id} ({_err_text})'
 
         result = {
             'success': False,
@@ -159,7 +186,7 @@ def delete_entry():
     else:
         result = {
             'success': True,
-            'text': f'Entry with entryId: {entry_id} deleted'
+            'text': f'record deleted'
         }
     return jsonify(result)
 
@@ -188,7 +215,7 @@ def close_db(error) -> None:
         print('DB Connection closed.')
 
 
-def _db_initialize() -> sqlite3.Connection:
+def _db_initialize() -> None:
     """
     Executes script to create desired tables in database
 
@@ -200,7 +227,9 @@ def _db_initialize() -> sqlite3.Connection:
 
     print('_db_initialize() called...')
 
-    db_connection = _db_create_connection()
+    DB.create_all()
+
+    # db_connection = _db_create_connection()
 
     # with APP.open_resource(SCHEMA_FILENAME, mode='r'):
     #     ...
@@ -209,12 +238,12 @@ def _db_initialize() -> sqlite3.Connection:
     # and give it relative path (instead of absolute),
     # use the above with APP.open_resource() pattern
 
-    with open(DIR_PATH_SCHEMA_FILE, mode='r') as f:
-        db_connection.cursor().executescript(f.read())  # Executes the sql script
+    # with open(DIR_PATH_SCHEMA_FILE, mode='r') as f:
+    #     db_connection.cursor().executescript(f.read())  # Executes the sql script
 
-    db_connection.commit()  # Saves the changes
+    # db_connection.commit()  # Saves the changes
     # db_connection.close()
-    return db_connection
+    # return db_connection
 
 
 def _db_create_connection() -> sqlite3.Connection:
